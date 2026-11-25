@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parties & Candidates</title>
+  <style>
+    :root {
+      --bg: #f7f8fa;
+      --surface: #fff;
+      --ink: #182230;
+      --muted: #667085;
+      --line: #e6e9ef;
+      --blue: #3157d5;
+      --blue-soft: #edf1ff;
+      --shadow: 0 8px 28px rgba(20, 32, 55, .055);
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+    .page { width: min(1000px, calc(100% - 40px)); margin: auto; padding: 48px 0 60px; }
+    .brand { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 12px; font-weight: 750; text-transform: uppercase; letter-spacing: .09em; margin-bottom: 30px; text-decoration: none; }
+    .brand-mark { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; color: white; background: var(--blue); font-size: 15px; }
+    h1 { margin: 0; font-size: clamp(32px, 5vw, 44px); line-height: 1.12; letter-spacing: -.045em; }
+    .accent-dot { color: var(--blue); }
+    .intro { color: var(--muted); max-width: 590px; margin: 12px 0 0; font-size: 15px; }
+    .panel { margin-top: 34px; background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 22px; box-shadow: var(--shadow); }
+    .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 20px; }
+    .section-title { margin: 0; font-size: 17px; letter-spacing: -.02em; }
+    .section-subtitle { color: var(--muted); font-size: 13px; margin: 4px 0 0; }
+    .total { color: var(--muted); font-size: 13px; white-space: nowrap; }
+    .controls { display: flex; gap: 12px; margin-bottom: 12px; }
+    .search { position: relative; flex: 1; min-width: 0; }
+    .search span { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #98a2b3; font-size: 18px; }
+    input, select { width: 100%; height: 45px; border: 1px solid var(--line); border-radius: 11px; background: #fff; color: var(--ink); font: inherit; font-size: 14px; outline: none; }
+    input { padding: 0 14px 0 40px; }
+    select { padding: 0 34px 0 12px; cursor: pointer; }
+    input:focus, select:focus { border-color: #9aaaf4; box-shadow: 0 0 0 3px var(--blue-soft); }
+    .sort-label { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; font-weight: 700; margin: 0 0 14px 2px; }
+    .sort-label select { width: auto; min-width: 170px; height: 34px; font-size: 12px; font-weight: 600; }
+    .candidate-list { display: flex; flex-direction: column; gap: 10px; }
+    .candidate {
+      display: grid; grid-template-columns: 36px minmax(0, 1fr) 72px; align-items: center; gap: 16px;
+      padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: white;
+      transition: border-color .18s ease, transform .18s ease, box-shadow .18s ease;
+    }
+    .candidate:hover { border-color: #cbd4fb; transform: translateY(-1px); box-shadow: 0 6px 18px rgba(20,32,55,.045); }
+    .number { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; background: #f2f4f7; color: #667085; font-size: 13px; font-weight: 750; }
+    .candidate-info { min-width: 0; }
+    .name-row { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; }
+    .candidate h3 { margin: 0; font-size: 15px; letter-spacing: -.015em; }
+    .party-tag { display: inline-flex; align-items: center; border-radius: 6px; background: var(--blue-soft); color: var(--blue); padding: 3px 7px; font-size: 10px; font-weight: 750; letter-spacing: .04em; text-transform: uppercase; }
+    .candidate-desc { margin: 5px 0 0; color: var(--muted); font-size: 12px; }
+    .candidate-image {
+      width: 64px; height: 64px; border-radius: 13px; display: grid; place-items: center; justify-self: end;
+      color: var(--blue); background: linear-gradient(145deg, #edf1ff, #f8f9ff); border: 1px solid #e0e6ff;
+      font-size: 18px; font-weight: 750; letter-spacing: -.03em;
+    }
+    .candidate-image img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
+    .empty { display: none; text-align: center; color: var(--muted); padding: 35px 15px; border: 1px dashed var(--line); border-radius: 14px; font-size: 14px; }
+    .footer { display: flex; justify-content: space-between; gap: 12px; margin-top: 20px; color: var(--muted); font-size: 12px; }
+    dialog { width: min(440px, calc(100% - 30px)); border: 1px solid var(--line); border-radius: 18px; padding: 25px; color: var(--ink); box-shadow: 0 24px 80px #10182833; }
+    dialog::backdrop { background: #10182866; backdrop-filter: blur(3px); }
+    dialog h2 { margin: 14px 0 6px; font-size: 23px; letter-spacing: -.03em; }
+    dialog p { color: var(--muted); font-size: 14px; }
+    .dialog-actions { display: flex; justify-content: flex-end; margin-top: 22px; }
+    .close-btn { border: 1px solid var(--line); background: white; padding: 9px 14px; border-radius: 10px; cursor: pointer; font: inherit; font-size: 13px; font-weight: 650; }
+    @media (max-width: 600px) {
+      .page { width: calc(100% - 26px); padding-top: 28px; }
+      .panel { padding: 14px; margin-top: 26px; }
+      .panel-head { align-items: flex-start; }
+      .controls { flex-direction: column; }
+      .candidate { grid-template-columns: 30px minmax(0, 1fr) 54px; gap: 10px; padding: 12px; }
+      .number { width: 30px; height: 30px; }
+      .candidate-image { width: 50px; height: 50px; border-radius: 11px; font-size: 15px; }
+      .sort-label { flex-wrap: wrap; }
+      .sort-label select { min-width: 150px; }
+      .footer { flex-direction: column; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <a class="brand" href="index.html"><span class="brand-mark">✓</span> Civic Calendar</a>
+    <header>
+      <h1>Parties &amp; Candidates<span class="accent-dot">.</span></h1>
+      <p class="intro">Get to know the candidates and political parties participating in upcoming elections. Sort the list and explore each profile.</p>
+    </header>
+
+    <section class="panel" aria-labelledby="list-heading">
+      <div class="panel-head">
+        <div>
+          <h2 class="section-title" id="list-heading">Candidate directory</h2>
+          <p class="section-subtitle">Browse candidates by party or election type</p>
+        </div>
+        <span class="total" id="result-count" aria-live="polite">6 candidates</span>
+      </div>
+
+      <div class="controls">
+        <label class="search">
+          <span aria-hidden="true">⌕</span>
+          <input id="search" type="search" placeholder="Search name or party..." aria-label="Search candidates and parties">
+        </label>
+        <select id="type-filter" aria-label="Filter by election type">
+          <option value="all">All election types</option>
+          <option value="National">National</option>
+          <option value="State">State</option>
+          <option value="Local">Local</option>
+          <option value="By-election">By-election</option>
+        </select>
+      </div>
+
+      <label class="sort-label" for="sort-by">SORT BY
+        <select id="sort-by">
+          <option value="default">Candidate number</option>
+          <option value="name">Candidate name (A–Z)</option>
+          <option value="party">Party name (A–Z)</option>
+          <option value="type">Election type</option>
+        </select>
+      </label>
+
+      <div class="candidate-list" id="candidate-list">
+        <article class="candidate" data-number="1" data-name="Candidate One" data-party="Progress Party" data-type="National" data-description="Candidate profile for the national election. Replace this sample with verified information.">
+          <span class="number">01</span>
+          <div class="candidate-info"><div class="name-row"><h3>Candidate One</h3><span class="party-tag">Progress Party</span></div><p class="candidate-desc">National election · Candidate profile</p></div>
+          <div class="candidate-image" aria-label="Candidate image placeholder">C1</div>
+        </article>
+        <article class="candidate" data-number="2" data-name="Candidate Two" data-party="People's Alliance" data-type="State" data-description="Candidate profile for the state election. Replace this sample with verified information.">
+          <span class="number">02</span>
+          <div class="candidate-info"><div class="name-row"><h3>Candidate Two</h3><span class="party-tag">People's Alliance</span></div><p class="candidate-desc">State election · Candidate profile</p></div>
+          <div class="candidate-image" aria-label="Candidate image placeholder">C2</div>
+        </article>
+        <article class="candidate" data-number="3" data-name="Candidate Three" data-party="National Unity Party" data-type="National" data-description="Candidate profile for the national election. Replace this sample with verified information.">
+          <span class="number">03</span>
+          <div class="candidate-info"><div class="name-row"><h3>Candidate Three</h3><span class="party-tag">National Unity Party</span></div><p class="candidate-desc">National election · Candidate profile</p></div>
+          <div class="candidate-image" aria-label="Candidate image placeholder">C3</div>
+        </article>
+        <article class="candidate" data-number="4" data-name="Candidate Four" data-party="Community First" data-type="Local" data-description="Candidate profile for the local election. Replace this sample with verified information.">
+          <span class="number">04</span>
+          <div class="candidate-info"><div class="name-row"><h3>Candidate Four</h3><span class="party-tag">Community First</span></div><p class="candidate-desc">Local election · Candidate profile</p></div>
+          <div class="candidate-image" aria-label="Candidate image placeholder">C4</div>
+        </article>
+        <article class="candidate" data-number="5" data-name="Candidate Five" data-party="Progress Party" data-type="By-election" data-description="Candidate profile for the by-election. Replace this sample with verified information.">
+          <span class="number">05</span>
+          <div class="candidate-info"><div class="name-row"><h3>Candidate Five</h3><span class="party-tag">Progress Party</span></div><p class="candidate-desc">By-election · Candidate profile</p></div>
+          <div class="candidate-image" aria-label="Candidate image placeholder">C5</div>
+        </article>
+        <article class="candidate" data-number="6" data-name="Candidate Six" data-party="People's Alliance" data-type="State" data-description="Candidate profile for the state election. Replace this sample with verified information.">
+          <span class="number">06</span>
+          <div class="candidate-info"><div class="name-row"><h3>Candidate Six</h3><span class="party-tag">People's Alliance</span></div><p class="candidate-desc">State election · Candidate profile</p></div>
+          <div class="candidate-image" aria-label="Candidate image placeholder">C6</div>
+        </article>
+        <div class="empty" id="empty-state">No candidates match your search. Try another name, party, or election type.</div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <span>Parties &amp; candidates directory</span>
+      <span>Demo content · Replace with verified election information</span>
+    </footer>
+  </main>
+
+  <dialog id="candidate-dialog" aria-labelledby="dialog-title">
+    <span class="party-tag" id="dialog-party">Party</span>
+    <h2 id="dialog-title">Candidate name</h2>
+    <p id="dialog-info"></p>
+    <div class="dialog-actions"><button class="close-btn" id="close-dialog">Close</button></div>
+  </dialog>
+
+  <script>
+    const searchInput = document.querySelector("#search");
+    const typeFilter = document.querySelector("#type-filter");
+    const sortSelect = document.querySelector("#sort-by");
+    const list = document.querySelector("#candidate-list");
+    const emptyState = document.querySelector("#empty-state");
+    const count = document.querySelector("#result-count");
+    const dialog = document.querySelector("#candidate-dialog");
+    const candidates = [...document.querySelectorAll(".candidate")];
+
+    function updateCandidates() {
+      const query = searchInput.value.trim().toLowerCase();
+      const selectedType = typeFilter.value;
+      const sortBy = sortSelect.value;
+
+      const sorted = [...candidates].sort((a, b) => {
+        if (sortBy === "name") return a.dataset.name.localeCompare(b.dataset.name);
+        if (sortBy === "party") return a.dataset.party.localeCompare(b.dataset.party);
+        if (sortBy === "type") return a.dataset.type.localeCompare(b.dataset.type) || Number(a.dataset.number) - Number(b.dataset.number);
+        return Number(a.dataset.number) - Number(b.dataset.number);
+      });
+
+      sorted.forEach(card => {
+        const matchesQuery = `${card.dataset.name} ${card.dataset.party} ${card.dataset.type} ${card.dataset.description}`.toLowerCase().includes(query);
+        const matchesType = selectedType === "all" || card.dataset.type === selectedType;
+        card.hidden = !(matchesQuery && matchesType);
+        list.insertBefore(card, emptyState);
+      });
+
+      const visible = candidates.filter(card => !card.hidden).length;
+      count.textContent = `${visible} candidate${visible === 1 ? "" : "s"}`;
+      emptyState.style.display = visible ? "none" : "block";
+    }
+
+    searchInput.addEventListener("input", updateCandidates);
+    typeFilter.addEventListener("change", updateCandidates);
+    sortSelect.addEventListener("change", updateCandidates);
+
+    candidates.forEach(card => {
+      card.tabIndex = 0;
+      card.setAttribute("role", "button");
+      card.setAttribute("aria-label", `View ${card.dataset.name} profile`);
+      function openProfile() {
+        document.querySelector("#dialog-title").textContent = card.dataset.name;
+        document.querySelector("#dialog-party").textContent = card.dataset.party;
+        document.querySelector("#dialog-info").textContent = `${card.dataset.description} Election type: ${card.dataset.type}.`;
+        dialog.showModal();
+      }
+      card.addEventListener("click", openProfile);
+      card.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          openProfile();
+        }
+      });
+    });
+
+    document.querySelector("#close-dialog").addEventListener("click", () => dialog.close());
+    dialog.addEventListener("click", event => {
+      if (event.target === dialog) dialog.close();
+    });
+    updateCandidates();
+  </script>
+</body>
+</html>

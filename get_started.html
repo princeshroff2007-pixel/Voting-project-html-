@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Started - Online Polling & Voting</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f4f6f9;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Top Header Navigation */
+        header {
+            width: 100%;
+            background: #ffffff;
+            border-bottom: 2px solid #e0e0e0;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .header-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #1a365d;
+            text-decoration: none;
+        }
+
+        .lang-btn {
+            background: #2b6cb0;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 42px;
+            height: 42px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease;
+        }
+
+        .lang-btn:hover {
+            background: #2c5282;
+        }
+
+        /* Main Container Layout */
+        main {
+            width: 100%;
+            max-width: 550px;
+            margin: 40px 20px;
+            background: #ffffff;
+            border: 2px solid #3182ce;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        h2.form-title {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            color: #2b6cb0;
+            border-bottom: 2px solid #edf2f7;
+            padding-bottom: 10px;
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 1rem;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #cbd5e0;
+            border-radius: 6px;
+            font-size: 1rem;
+            background-color: #fff;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-group select:focus {
+            border-color: #3182ce;
+        }
+
+        /* Form Buttons */
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-clear {
+            background-color: #e2e8f0;
+            color: #4a5568;
+            border: 1px solid #cbd5e0;
+        }
+
+        .btn-submit {
+            background-color: #2b6cb0;
+            color: white;
+        }
+
+        /* Eligibility Popup Modal Layout */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-box {
+            background: #ffffff;
+            border: 3px solid #3182ce;
+            border-radius: 12px;
+            padding: 35px 25px;
+            width: 90%;
+            max-width: 420px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            animation: popup 0.3s ease-out;
+        }
+
+        @keyframes popup {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            color: #276749;
+            margin-bottom: 25px;
+            font-weight: bold;
+            line-height: 1.4;
+        }
+
+        .vote-link-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background-color: #3182ce;
+            color: white;
+            text-decoration: none;
+            padding: 14px 28px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            border-radius: 8px;
+            border: 2px solid #2b6cb0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.1s ease, background 0.2s ease;
+        }
+
+        .vote-link-btn:hover {
+            background-color: #2b6cb0;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header with Language Switcher -->
+    <header>
+        <a class="header-title" id="hdr-title" href="index.html">Get Started</a>
+        <button class="lang-btn" id="langBtn" onclick="toggleLanguage()" title="Switch Language">अ</button>
+    </header>
+
+    <!-- Main Selection Form -->
+    <main>
+        <h2 class="form-title" id="form-heading">Select Your Details</h2>
+        <form id="voterForm" onsubmit="handleFormSubmit(event)">
+            
+            <!-- 1. Select State/Area -->
+            <div class="form-group">
+                <label id="lbl-state" for="state">1. Select your Area (State)</label>
+                <select id="state" required>
+                    <option value="" disabled selected>Select State</option>
+                    <option value="state1">Delhi</option>
+                    <option value="state2">Maharashtra</option>
+                    <option value="state3">Punjab</option>
+                    <option value="state4">Uttar Pradesh</option>
+                </select>
+            </div>
+
+            <!-- 2. Select Election Type -->
+            <div class="form-group">
+                <label id="lbl-election" for="election">2. Select election type</label>
+                <select id="election" required>
+                    <option value="" disabled selected>Select Election Type</option>
+                    <option value="vidhansabha">Vidhansabha</option>
+                    <option value="loksabha">Lok Sabha</option>
+                    <option value="municipal">Municipal Corporation</option>
+                </select>
+            </div>
+
+            <!-- 3. Select District -->
+            <div class="form-group">
+                <label id="lbl-district" for="district">3. Select District</label>
+                <select id="district" required>
+                    <option value="" disabled selected>Select District</option>
+                    <option value="dist1">Central District</option>
+                    <option value="dist2">North District</option>
+                    <option value="dist3">South District</option>
+                </select>
+            </div>
+
+            <!-- 4. Select Home Town -->
+            <div class="form-group">
+                <label id="lbl-town" for="town">4. Select home town</label>
+                <select id="town" required>
+                    <option value="" disabled selected>Select Home Town</option>
+                    <option value="town1">Town Central</option>
+                    <option value="town2">Town East</option>
+                    <option value="town3">Town West</option>
+                </select>
+            </div>
+
+            <!-- 5. Select Ward -->
+            <div class="form-group">
+                <label id="lbl-ward" for="ward">5. Select Ward</label>
+                <select id="ward" required>
+                    <option value="" disabled selected>Select Ward</option>
+                    <option value="ward1">Ward 01</option>
+                    <option value="ward2">Ward 02</option>
+                    <option value="ward3">Ward 03</option>
+                </select>
+            </div>
+
+            <!-- Form Action Buttons -->
+            <div class="btn-group">
+                <button type="button" class="btn btn-clear" id="btn-clear" onclick="clearForm()">Clear</button>
+                <button type="submit" class="btn btn-submit" id="btn-submit">Submit</button>
+            </div>
+
+        </form>
+    </main>
+
+    <!-- Eligibility Pop Up Modal -->
+    <div class="modal-overlay" id="eligibilityModal">
+        <div class="modal-box">
+            <div class="modal-title" id="modal-msg">Demo selections accepted.<br>Eligibility is not verified.</div>
+            <a href="virtual_evm.html" class="vote-link-btn" id="vote-btn">
+                VOTE 
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"></path>
+                    <path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v6"></path>
+                    <path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"></path>
+                    <path d="M18 8a2 2 0 0 1 2 2v4a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.83l1.17 1.17V10"></path>
+                </svg>
+            </a>
+        </div>
+    </div>
+
+    <!-- Minimal JavaScript -->
+    <script>
+        let currentLang = 'EN';
+
+        const translations = {
+            EN: {
+                title: "Get Started",
+                formHeading: "Select Your Details",
+                state: "1. Select your Area (State)",
+                election: "2. Select election type",
+                district: "3. Select District",
+                town: "4. Select home town",
+                ward: "5. Select Ward",
+                clear: "Clear",
+                submit: "Submit",
+                modalMsg: "Demo selections accepted.<br>Eligibility is not verified.",
+                voteBtn: "VOTE"
+            },
+            HI: {
+                title: "शुरू करें",
+                formHeading: "अपना विवरण चुनें",
+                state: "1. अपना क्षेत्र (राज्य) चुनें",
+                election: "2. चुनाव का प्रकार चुनें",
+                district: "3. जिला चुनें",
+                town: "4. अपना गृह शहर चुनें",
+                ward: "5. वार्ड चुनें",
+                clear: "साफ़ करें",
+                submit: "सबमिट करें",
+                modalMsg: "डेमो विवरण स्वीकार किए गए।<br>पात्रता सत्यापित नहीं है।",
+                voteBtn: "वोट दें"
+            }
+        };
+
+        function toggleLanguage() {
+            const langBtn = document.getElementById('langBtn');
+            if (currentLang === 'EN') {
+                currentLang = 'HI';
+                langBtn.textContent = 'A';
+            } else {
+                currentLang = 'EN';
+                langBtn.textContent = 'अ';
+            }
+
+            const t = translations[currentLang];
+            document.getElementById('hdr-title').textContent = t.title;
+            document.getElementById('form-heading').textContent = t.formHeading;
+            document.getElementById('lbl-state').textContent = t.state;
+            document.getElementById('lbl-election').textContent = t.election;
+            document.getElementById('lbl-district').textContent = t.district;
+            document.getElementById('lbl-town').textContent = t.town;
+            document.getElementById('lbl-ward').textContent = t.ward;
+            document.getElementById('btn-clear').textContent = t.clear;
+            document.getElementById('btn-submit').textContent = t.submit;
+            
+            // Modal translations
+            document.getElementById('modal-msg').innerHTML = t.modalMsg;
+            const voteBtn = document.getElementById('vote-btn');
+            voteBtn.childNodes[0].nodeValue = t.voteBtn + ' ';
+        }
+
+        function clearForm() {
+            document.getElementById('voterForm').reset();
+        }
+
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            // Show the eligibility modal popup
+            document.getElementById('eligibilityModal').style.display = 'flex';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoteSecure - Online Polling & Voting System</title>
+    <style>
+        /* CSS Reset & Base Variables */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --text-dark: #1f2937;
+            --text-muted: #6b7280;
+            --bg-light: #f9fafb;
+            --bg-card: #ffffff;
+            --border-color: #e5e7eb;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        /* Container helper */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Section Styling */
+        section {
+            padding: 50px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            color: var(--primary);
+        }
+
+        /* 1. NAVBAR */
+        header {
+            background-color: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .logo svg {
+            width: 28px;
+            height: 28px;
+            fill: var(--primary);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            list-style: none;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        .btn-outline:hover {
+            background-color: #eef2ff;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        .icon-btn:hover {
+            background-color: #f3f4f6;
+        }
+
+        /* 2. HERO / QUICK LINKS SECTION */
+        .hero {
+            background-color: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            padding: 60px 0;
+        }
+
+        .hero-grid {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .hero-content {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .hero-content h1 {
+            font-size: 2.2rem;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .quick-links {
+            margin-bottom: 25px;
+            list-style-type: none;
+        }
+
+        .quick-links li {
+            position: relative;
+            padding-left: 25px;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .quick-links li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .hero-card {
+            flex: 1;
+            min-width: 280px;
+            background: var(--bg-light);
+            border: 1px solid var(--border-color);
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        /* 3. ABOUT & PROCESS SECTION */
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .card h3 {
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        /* Process Flow */
+        .process-flow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            background: var(--bg-card);
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .flow-step {
+            flex: 1;
+            min-width: 120px;
+            text-align: center;
+            padding: 10px;
+            background: var(--bg-light);
+            border-radius: 6px;
+            font-weight: 600;
+            color: var(--text-dark);
+            border: 1px solid var(--border-color);
+        }
+
+        .flow-arrow {
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        /* 4. OFFICIALS SECTION */
+        .officials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        .official-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: #e0e7ff;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px auto;
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .official-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .official-card p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* 5. FOOTER */
+        footer {
+            background-color: #ffffff;
+            border-top: 1px solid var(--border-color);
+            padding: 40px 0 20px 0;
+            margin-top: 40px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-brand p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+
+        .footer-links h4, .footer-team h4 {
+            margin-bottom: 12px;
+            color: var(--text-dark);
+        }
+
+        .footer-links ul {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 8px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* MODAL POPUPS */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 400px;
+            width: 90%;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        /* Responsive tweak for Mobile */
+        @media (max-width: 600px) {
+            .navbar {
+                flex-direction: column;
+                height: auto;
+                padding: 15px 0;
+                gap: 10px;
+            }
+            .flow-arrow {
+                display: none;
+            }
+            .process-flow {
+                flex-direction: column;
+            }
+            .flow-step {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. NAVBAR -->
+    <header>
+        <div class="container navbar">
+            <div class="logo">
+                <!-- Inked Finger Icon SVG -->
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                </svg>
+                <span>VoteSecure</span>
+            </div>
+
+            <ul class="nav-links">
+                <li><a href="#about" data-en="About" data-hi="हमारे बारे में">About</a></li>
+                <li><a href="#process" data-en="Process" data-hi="प्रक्रिया">Process</a></li>
+                <li><a href="#officials" data-en="Officials" data-hi="अधिकारी">Officials</a></li>
+            </ul>
+
+            <div class="header-controls">
+                <!-- Language Toggle Button -->
+                <button class="btn btn-outline" id="langToggleBtn" onclick="toggleLanguage()">Hindi</button>
+                
+                <!-- Notification Bell Icon -->
+                <button class="icon-btn" onclick="openModal('newsModal')" title="Notifications & News">🔔</button>
+                
+                <!-- Sign In Button -->
+                <button class="btn" onclick="openModal('signInModal')" data-en="Sign In" data-hi="साइन इन">Sign In</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 2. QUICK LINKS / HERO BANNER SECTION -->
+    <section class="hero">
+        <div class="container hero-grid">
+            <div class="hero-content">
+                <h1 data-en="Online Voting Prototype" data-hi="ऑनलाइन मतदान प्रोटोटाइप">Online Voting Prototype</h1>
+                <ul class="quick-links">
+                    <li><a href="upcoming_elections.html" data-en="Upcoming Elections" data-hi="आगामी चुनाव">Upcoming Elections</a></li>
+                    <li><a href="candidates.html" data-en="Election Parties and Candidates" data-hi="चुनाव दल और उम्मीदवार">Election Parties and Candidates</a></li>
+                    <li><a href="get_started.html" data-en="Vote Remotely Your Favorite Candidate" data-hi="अपने पसंदीदा उम्मीदवार को दूरस्थ रूप से वोट दें">Vote Remotely Your Favorite Candidate</a></li>
+                </ul>
+                <button class="btn" style="padding: 12px 24px; font-size: 1rem;" onclick="openModal('signInModal')" data-en="Get Started →" data-hi="शुरू करें →">Get Started →</button>
+            </div>
+            
+            <div class="hero-card">
+                <h3 data-en="Cast Your Vote Today" data-hi="आज ही अपना वोट डालें">Cast Your Vote Today</h3>
+                <p style="color: var(--text-muted); margin: 15px 0;" data-en="Demo only: this site does not verify voter identity or record real votes." data-hi="केवल डेमो: यह साइट मतदाता की पहचान सत्यापित या वास्तविक वोट दर्ज नहीं करती है।">Demo only: this site does not verify voter identity or record real votes.</p>
+                <button class="btn btn-outline" onclick="scrollToSection('process')" data-en="Learn How It Works" data-hi="जानें कि यह कैसे काम करता है">Learn How It Works</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. ABOUT & LEGAL INFO SECTION -->
+    <section id="about">
+        <div class="container">
+            <h2 class="section-title" data-en="Why Vote Online" data-hi="ऑनलाइन वोट क्यों दें">Why Vote Online</h2>
+            
+            <div class="grid-3">
+                <div class="card">
+                    <h3 data-en="🔒 Demo Only" data-hi="🔒 केवल डेमो">🔒 Demo Only</h3>
+                    <p data-en="This prototype has no voter-verification or vote-recording backend." data-hi="इस प्रोटोटाइप में मतदाता सत्यापन या वोट दर्ज करने वाला बैकएंड नहीं है।">This prototype has no voter-verification or vote-recording backend.</p>
+                </div>
+                <div class="card">
+                    <h3 data-en="⚡ Convenience" data-hi="⚡ सुविधा">⚡ Convenience</h3>
+                    <p data-en="Explore the sample voter-details form and virtual ballot; no real vote is submitted." data-hi="नमूना मतदाता विवरण फ़ॉर्म और वर्चुअल बैलेट देखें; कोई वास्तविक वोट जमा नहीं होता।">Explore the sample voter-details form and virtual ballot; no real vote is submitted.</p>
+                </div>
+                <div class="card">
+                    <h3 data-en="📊 Sample Content" data-hi="📊 नमूना सामग्री">📊 Sample Content</h3>
+                    <p data-en="Candidate and election listings are examples. Check official sources for accurate information." data-hi="उम्मीदवार और चुनाव सूचियाँ उदाहरण हैं। सटीक जानकारी के लिए आधिकारिक स्रोत देखें।">Candidate and election listings are examples. Check official sources for accurate information.</p>
+                </div>
+            </div>
+
+            <!-- Verification & Voting Process Steps Flow -->
+            <div id="process" style="padding-top: 30px;">
+                <h3 style="text-align: center; margin-bottom: 20px;" data-en="Verification & Voting Steps Flow" data-hi="सत्यापन एवं मतदान प्रक्रिया चरण">Verification & Voting Steps Flow</h3>
+                <div class="process-flow">
+                    <div class="flow-step" data-en="1. Begin Demo" data-hi="1. डेमो शुरू करें">1. Begin Demo</div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-step" data-en="2. Select Details" data-hi="2. विवरण चुनें">2. Select Details</div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-step" data-en="3. Demo Review" data-hi="3. डेमो समीक्षा">3. Demo Review</div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-step" data-en="4. Preview Ballot" data-hi="4. बैलेट पूर्वावलोकन">4. Preview Ballot</div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-step" style="background: var(--primary); color: white;" data-en="5. VOTE" data-hi="5. वोट दें">5. VOTE</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. OFFICIALS & PERSONNEL SECTION -->
+    <section id="officials" style="background-color: #ffffff; border-top: 1px solid var(--border-color);">
+        <div class="container">
+            <h2 class="section-title" data-en="Sample Officials & Personnel" data-hi="नमूना अधिकारी एवं कर्मी">Sample Officials & Personnel</h2>
+            
+            <div class="officials-grid">
+                <!-- Official 1 -->
+                <div class="official-card">
+                    <div class="avatar">HOD</div>
+                    <h3>Shivam Kumar</h3>
+                    <p data-en="Sample Head of Department (HOD)" data-hi="नमूना विभागाध्यक्ष (HOD)">Sample Head of Department (HOD)</p>
+                    <p style="font-size: 0.8rem; margin-top: 5px;">Election Services Commission</p>
+                </div>
+
+                <!-- Official 2 -->
+                <div class="official-card">
+                    <div class="avatar">OFF</div>
+                    <h3>Prince Kumar</h3>
+                    <p data-en="Sample Chief Verification Officer" data-hi="नमूना मुख्य सत्यापन अधिकारी">Sample Chief Verification Officer</p>
+                    <p style="font-size: 0.8rem; margin-top: 5px;">Digital Identity Wing</p>
+                </div>
+
+                <!-- Official 3 -->
+                <div class="official-card">
+                    <div class="avatar">OFF</div>
+                    <h3>Mohit Kumar Sharma</h3>
+                    <p data-en="Sample Security & Operations Head" data-hi="नमूना सुरक्षा एवं परिचालन प्रमुख">Sample Security & Operations Head</p>
+                    <p style="font-size: 0.8rem; margin-top: 5px;">Cyber Standards Bureau</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. MINIMALIST FOOTER -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <!-- Left: Watermark / Logo & Info -->
+                <div class="footer-brand">
+                    <div class="logo">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                        </svg>
+                        <span>VoteSecure</span>
+                    </div>
+                    <p data-en="Online voting interface prototype. Demo only." data-hi="ऑनलाइन मतदान इंटरफ़ेस प्रोटोटाइप। केवल डेमो।">Online voting interface prototype. Demo only.</p>
+                </div>
+
+                <!-- Middle: Contact / Support Links -->
+                <div class="footer-links">
+                    <h4 data-en="Support & Personnel" data-hi="सहायता और कर्मचारी">Support & Personnel</h4>
+                    <ul>
+                        <li><a href="upcoming_elections.html">Upcoming Elections</a></li>
+                        <li><a href="candidates.html">Candidates</a></li>
+                        <li><a href="get_started.html">Get Started</a></li>
+                    </ul>
+                </div>
+
+                <!-- Right: Team Credits -->
+                <div class="footer-team">
+                    <h4 data-en="Website Development" data-hi="वेबसाइट विकास">Website Development</h4>
+                    <a href="web_creater.html"> <p style="font-size: 0.9rem; color:#4338ca;" data-en="Created by CodeTitans" data-hi="कोड़टाइटनस  द्वारा निर्मित">Created by CodeTitans</p></a>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">Sample interface for demonstration purposes.</p>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>© 2026 VoteSecure. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- MODAL 1: SIGN IN POPUP -->
+    <div class="modal" id="signInModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('signInModal')">&times;</button>
+            <h3 style="margin-bottom: 20px; color: var(--primary);" data-en="Demo Voter Sign In" data-hi="डेमो मतदाता साइन इन">Demo Voter Sign In</h3>
+            <form onsubmit="handleFormSubmit(event)">
+                <div class="form-group">
+                    <label data-en="Demo Registration ID" data-hi="डेमो पंजीकरण आईडी">Demo Registration ID</label>
+                    <input type="text" placeholder="e.g. DEMO-1234" autocomplete="off" required>
+                </div>
+                <div class="form-group">
+                    <label data-en="Demo Voter ID" data-hi="डेमो मतदाता पहचान पत्र">Demo Voter ID</label>
+                    <input type="text" placeholder="e.g. DEMO-VOTER-01" autocomplete="off" required>
+                </div>
+                <button type="submit" class="btn" style="width: 100%; margin-top: 10px;" data-en="Proceed to Verification" data-hi="सत्यापन के लिए आगे बढ़ें">Proceed to Verification</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 2: NOTIFICATIONS / NEWS POPUP -->
+    <div class="modal" id="newsModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('newsModal')">&times;</button>
+            <h3 style="margin-bottom: 15px; color: var(--primary);" data-en="News & Updates" data-hi="समाचार एवं अपडेट">News & Updates</h3>
+            <ul style="list-style-type: square; padding-left: 20px; font-size: 0.9rem;">
+                <li style="margin-bottom: 10px;" data-en="Election announcements shown here are sample content." data-hi="यहाँ दिखाए गए चुनाव संबंधी सूचनाएँ नमूना सामग्री हैं।">Election announcements shown here are sample content.</li>
+                <li style="margin-bottom: 10px;" data-en="Check your official election authority for dates and eligibility." data-hi="तारीखों और पात्रता के लिए अपने आधिकारिक चुनाव प्राधिकरण से जाँचें।">Check your official election authority for dates and eligibility.</li>
+                <li data-en="This prototype does not process or store real votes." data-hi="यह प्रोटोटाइप वास्तविक वोटों को संसाधित या संग्रहीत नहीं करता है।">This prototype does not process or store real votes.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- LIGHTWEIGHT JAVASCRIPT -->
+    <script>
+        // Track current language mode
+        let currentLang = 'en';
+
+        // Toggle Language between English and Hindi
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'hi' : 'en';
+            
+            // Update toggle button label
+            const btn = document.getElementById('langToggleBtn');
+            btn.innerText = currentLang === 'en' ? 'Hindi' : 'English';
+
+            // Swap text content for all elements with language attributes
+            const elements = document.querySelectorAll('[data-en]');
+            elements.forEach(el => {
+                el.innerText = el.getAttribute(`data-${currentLang}`);
+            });
+        }
+
+        // Open Modal
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+
+        // Close Modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Smooth Scroll helper
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Form Submit simulation
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            const msg = currentLang === 'en'
+                ? 'Demo sign-in complete. Continue to the demo voter details page.'
+                : 'डेमो साइन इन पूरा हुआ। डेमो मतदाता विवरण पृष्ठ पर जाएँ।';
+            alert(msg);
+            window.location.href = 'get_started.html';
+        }
+
+        // Close modal when clicking outside of modal box
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual EVM - Electronic Voting Machine</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f3f4f6;
+            color: #1f2937;
+            padding: 20px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* EVM Machine Frame */
+        .evm-container {
+            width: 100%;
+            max-width: 850px;
+            background-color: #e5e7eb;
+            border: 4px solid #9ca3af;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            padding: 20px;
+            position: relative;
+        }
+
+        /* EVM Header Bar */
+        .evm-header {
+            background-color: #1e293b;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .evm-header h1 {
+            font-size: 1.3rem;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-badge {
+            background-color: #10b981;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #ffffff;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        /* EVM Ballot Table */
+        .evm-table-wrapper {
+            background-color: #ffffff;
+            border: 2px solid #cbd5e1;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+
+        .evm-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+        }
+
+        .evm-table th {
+            background-color: #f1f5f9;
+            color: #475569;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 12px 8px;
+            border-bottom: 2px solid #cbd5e1;
+            border-right: 1px solid #e2e8f0;
+        }
+
+        .evm-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #e2e8f0;
+            border-right: 1px solid #e2e8f0;
+            vertical-align: middle;
+        }
+
+        .evm-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .sno {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #334155;
+            width: 50px;
+        }
+
+        .candidate-name {
+            text-align: left;
+            padding-left: 15px !important;
+            font-weight: 600;
+            font-size: 1rem;
+            color: #0f172a;
+        }
+
+        .party-symbol {
+            width: 45px;
+            height: 45px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 50%;
+            padding: 6px;
+        }
+
+        .party-symbol svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Note / Indicator Lamp */
+        .note-lamp {
+            width: 18px;
+            height: 18px;
+            background-color: #111827; /* Off state (Dark) */
+            border-radius: 50%;
+            margin: 0 auto;
+            border: 2px solid #6b7280;
+            transition: background-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .note-lamp.active-red {
+            background-color: #ef4444; /* Red light on vote click */
+            border-color: #b91c1c;
+            box-shadow: 0 0 10px #ef4444;
+        }
+
+        /* Interactive Vote Button */
+        .vote-btn-cell {
+            width: 130px;
+        }
+
+        .vote-btn {
+            background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            border: 2px solid #1e40af;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            box-shadow: 0 3px 0 #1e3a8a, 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.1s ease;
+            width: 100px;
+        }
+
+        .vote-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #1e3a8a;
+        }
+
+        .vote-btn.voted-red {
+            background: linear-gradient(180deg, #dc2626 0%, #b91c1c 100%) !important;
+            border-color: #991b1b !important;
+            box-shadow: 0 2px 0 #7f1d1d !important;
+        }
+
+        /* Candidate Photo */
+        .candidate-photo {
+            width: 48px;
+            height: 48px;
+            border-radius: 6px;
+            object-fit: cover;
+            border: 1px solid #cbd5e1;
+            background-color: #e2e8f0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #475569;
+            font-size: 0.85rem;
+        }
+
+        /* Confirm Bar at Bottom */
+        .evm-footer-bar {
+            margin-top: 20px;
+            background-color: #ffffff;
+            border: 2px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .confirm-main-btn {
+            background-color: #16a34a;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: background-color 0.2s;
+        }
+
+        .confirm-main-btn:hover {
+            background-color: #15803d;
+        }
+
+        .confirm-main-btn:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* MODAL POPUP (Page 2 Wireframe: Confirmation Screen) */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-card {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 420px;
+            text-align: center;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
+            border: 1px solid #e5e7eb;
+            animation: modalSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes modalSlide {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-title {
+            color: #4f46e5;
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+        }
+
+        .modal-candidate-img {
+            width: 120px;
+            height: 120px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 3px solid #4f46e5;
+            margin: 0 auto 15px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #e0e7ff;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #4f46e5;
+        }
+
+        .modal-symbol-wrapper {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 20px auto;
+            background: #f8fafc;
+            border: 2px solid #cbd5e1;
+            border-radius: 50%;
+            padding: 10px;
+        }
+
+        .modal-status-badge {
+            display: inline-block;
+            background-color: #dcfce7;
+            color: #15803d;
+            border: 1px solid #86efac;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+        }
+
+        .done-btn {
+            background-color: #4f46e5;
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.2s;
+        }
+
+        .done-btn:hover {
+            background-color: #4338ca;
+        }
+
+        @media (max-width: 640px) {
+            .evm-container {
+                padding: 10px;
+            }
+            .candidate-name {
+                font-size: 0.85rem;
+                padding-left: 5px !important;
+            }
+            .vote-btn {
+                width: 75px;
+                padding: 6px 8px;
+                font-size: 0.8rem;
+            }
+            .party-symbol {
+                width: 35px;
+                height: 35px;
+            }
+            .candidate-photo {
+                width: 36px;
+                height: 36px;
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- EVM CONTROL MACHINE CONTAINER -->
+    <div class="evm-container">
+        <!-- EVM Header -->
+        <div class="evm-header">
+            <h1>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
+                </svg>
+                VIRTUAL BALLOT UNIT (EVM)
+            </h1>
+            <div class="status-badge">
+                <span class="status-dot"></span> READY TO VOTE
+            </div>
+        </div>
+
+        <!-- EVM Candidate List Table -->
+        <div class="evm-table-wrapper">
+            <table class="evm-table">
+                <thead>
+                    <tr>
+                        <th>S.No</th>
+                        <th style="text-align: left; padding-left: 15px;">Candidate Name</th>
+                        <th>Symbol</th>
+                        <th>Note</th>
+                        <th>Vote Button</th>
+                        <th>Photo</th>
+                    </tr>
+                </thead>
+                <tbody id="evmTableBody">
+                    <!-- Dynamic Rows Generated via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Footer / Confirmation Action -->
+        <div class="evm-footer-bar">
+            <span id="selectedInfoText" style="font-weight: 600; color: #475569;">
+                Select a candidate by pressing the BLUE vote button.
+            </span>
+            <button id="confirmBtn" class="confirm-main-btn" disabled onclick="openConfirmModal()">
+                Confirm Vote
+            </button>
+        </div>
+    </div>
+
+    <!-- PAGE 2 WIREFRAME: CONFIRMATION POPUP MODAL -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal-card">
+            <h2 class="modal-title">Vote Confirmation</h2>
+            
+            <!-- Candidate Image Display -->
+            <div class="modal-candidate-img" id="modalCandPhoto">P1</div>
+            
+            <h3 id="modalCandName" style="color: #0f172a; margin-bottom: 10px;">Candidate Name</h3>
+            
+            <!-- Party Symbol Display -->
+            <div class="modal-symbol-wrapper" id="modalCandSymbol">
+                <!-- SVG Icon inserted dynamically -->
+            </div>
+            
+            <!-- Submitted Status -->
+            <div>
+                <span class="modal-status-badge">Demo preview</span>
+            </div>
+
+            <!-- Done (Closing) Button -->
+            <button class="done-btn" onclick="finishVoting()">Done (Closing)</button>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC & BEEP SOUND SYNTHESIS -->
+    <script>
+        // Candidates Data Array matching wireframe specifications
+        const candidates = [
+            { id: 1, name: "Aarav Sharma", party: "Janata Dal", photoLabel: "P1", symbolSvg: `<svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><path d="M12 2v20M5 7l14 10M5 17L19 7"/></svg>` /* Broom */ },
+            { id: 2, name: "Vikram Singh", party: "Trishul Party", photoLabel: "P2", symbolSvg: `<svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><path d="M12 2v20M6 4v6a6 6 0 0012 0V4"/></svg>` /* Trident */ },
+            { id: 3, name: "Priya Patel", party: "National Congress", photoLabel: "P3", symbolSvg: `<svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><path d="M18 11V6a2 2 0 00-4 0v3m-2-5v5m-2-4v4m-2-3v8a6 6 0 0012 0v-3"/></svg>` /* Hand */ },
+            { id: 4, name: "Rajesh Kumar", party: "Bharatiya Vikas", photoLabel: "P4", symbolSvg: `<svg viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2"><path d="M12 3a9 9 0 00-9 9c0 5 9 9 9 9s9-4 9-9a9 9 0 00-9-9zm0 4a5 5 0 110 10 5 5 0 010-10z"/></svg>` /* Lotus/Flower */ },
+            { id: 5, name: "Ananya Roy", party: "Surya Alliance", photoLabel: "P5", symbolSvg: `<svg viewBox="0 0 24 24" fill="none" stroke="#ca8a04" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v3m0 16v3m11-11h-3M4 12H1m15.07-7.07l-2.12 2.12M7.05 16.95l-2.12 2.12m14.14 0l-2.12-2.12M7.05 7.05L4.93 4.93"/></svg>` /* Sun */ },
+            { id: 6, name: "Suresh Menon", party: "Pragati Chakra", photoLabel: "P6", symbolSvg: `<svg viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v6m0 6v6m9-9h-6M9 12H3"/></svg>` /* Wheel */ },
+            { id: 7, name: "Kavita Reddy", party: "Nagrik Manch", photoLabel: "P7", symbolSvg: `<svg viewBox="0 0 24 24" fill="none" stroke="#9333ea" stroke-width="2"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="4"/></svg>` /* Ring */ },
+            { id: 8, name: "Amitabh Das", party: "Gati Transport", photoLabel: "P8", symbolSvg: `<svg viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2"><path d="M5 17h14M5 12h14l-2-5H7l-2 5z"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg>` /* Car */ },
+            { id: 9, name: "Meena Joshi", party: "Lok Kalyan", photoLabel: "P9", symbolSvg: `<svg viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><path d="M3 12h18M12 3v18"/></svg>` /* Cross/Plus */ },
+            { id: 10, name: "NOTA", party: "None of the Above", photoLabel: "NOTA", symbolSvg: `<svg viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M15 9l-6 6m0-6l6 6"/></svg>` /* NOTA Cross */ }
+        ];
+
+        let selectedCandidateId = null;
+
+        // Render EVM Table Rows
+        function renderEVMTable() {
+            const tbody = document.getElementById('evmTableBody');
+            tbody.innerHTML = '';
+
+            candidates.forEach(cand => {
+                const tr = document.createElement('tr');
+                tr.id = `candidate-row-${cand.id}`;
+                tr.innerHTML = `
+                    <td class="sno">${cand.id}.</td>
+                    <td class="candidate-name">
+                        <div>${cand.name}</div>
+                        <div style="font-weight: normal; font-size: 0.8rem; color: #64748b;">${cand.party}</div>
+                    </td>
+                    <td>
+                        <div class="party-symbol" title="${cand.party}">${cand.symbolSvg}</div>
+                    </td>
+                    <td>
+                        <div class="note-lamp" id="lamp-${cand.id}"></div>
+                    </td>
+                    <td class="vote-btn-cell">
+                        <button class="vote-btn" id="vote-btn-${cand.id}" onclick="castVote(${cand.id})">
+                            VOTE
+                        </button>
+                    </td>
+                    <td>
+                        <div class="candidate-photo">${cand.photoLabel}</div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Play EVM Electronic Beep Sound using Web Audio API
+        function playEVMBeep() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // 880Hz pitch sound
+                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+
+                oscillator.start();
+                // 1-second long continuous beep sound standard to EVMs
+                oscillator.stop(audioCtx.currentTime + 1.0);
+            } catch (e) {
+                console.log('Audio playback context not allowed yet');
+            }
+        }
+
+        // Action when pressing Blue Vote Button
+        function castVote(candidateId) {
+            // Reset all previous buttons & lamps
+            candidates.forEach(c => {
+                const btn = document.getElementById(`vote-btn-${c.id}`);
+                const lamp = document.getElementById(`lamp-${c.id}`);
+                if (btn) btn.classList.remove('voted-red');
+                if (lamp) lamp.classList.remove('active-red');
+            });
+
+            // Activate current selection
+            const currentBtn = document.getElementById(`vote-btn-${candidateId}`);
+            const currentLamp = document.getElementById(`lamp-${candidateId}`);
+
+            if (currentBtn && currentLamp) {
+                currentBtn.classList.add('voted-red');
+                currentLamp.classList.add('active-red');
+            }
+
+            // Play electronic beep indicator sound
+            playEVMBeep();
+
+            // Set state
+            selectedCandidateId = candidateId;
+            const cand = candidates.find(c => c.id === candidateId);
+            
+            // Enable confirm button & update feedback text
+            document.getElementById('confirmBtn').disabled = false;
+            document.getElementById('selectedInfoText').innerHTML = 
+                `Selected: <span style="color: #4f46e5; font-weight:700;">${cand.name} (${cand.party})</span>`;
+        }
+
+        // Open Confirmation Popup Modal (Wireframe Page 2)
+        function openConfirmModal() {
+            if (!selectedCandidateId) return;
+            const cand = candidates.find(c => c.id === selectedCandidateId);
+
+            document.getElementById('modalCandPhoto').innerText = cand.photoLabel;
+            document.getElementById('modalCandName').innerText = cand.name + " (" + cand.party + ")";
+            document.getElementById('modalCandSymbol').innerHTML = cand.symbolSvg;
+
+            document.getElementById('confirmModal').style.display = 'flex';
+        }
+
+        // Done (Closing) Button Action
+        function finishVoting() {
+            document.getElementById('confirmModal').style.display = 'none';
+            alert('This demo does not verify eligibility or record a real vote.');
+            window.location.href = 'index.html';
+        }
+
+        // Initialize table on DOM Load
+        window.onload = function() {
+            renderEVMTable();
+        };
+    </script>
+</body>
+</html>
